@@ -1,0 +1,160 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=openvpn
+      - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.ovpn
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.132.0/24
+      - TZ=America/Phoenix
+    env_file: [/opt/arr/gluetun.env]
+    volumes: ["/opt/arr/gluetun:/gluetun"]
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    restart: unless-stopped
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix, WEBUI_PORT=8080]
+    volumes:
+      - /opt/appdata/qbittorrent:/config
+      - /data/torrents:/data/torrents
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes:
+      - /opt/appdata/jellyfin:/config
+      - /data/media:/data/media
+    devices: [/dev/dri:/dev/dri]
+    group_add: ["992","44"]
+    ports: ["8096:8096"]
+    restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes: ["/opt/appdata/prowlarr:/config"]
+    ports: ["9696:9696"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes:
+      - /opt/appdata/sonarr:/config
+      - /data:/data
+    ports: ["8989:8989"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes:
+      - /opt/appdata/radarr:/config
+      - /data:/data
+    ports: ["7878:7878"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes:
+      - /opt/appdata/lidarr:/config
+      - /data:/data
+    ports: ["8686:8686"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment: [LOG_LEVEL=info, TZ=America/Phoenix]
+    ports: ["8191:8191"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment: [TZ=America/Phoenix, LOG_LEVEL=info]
+    volumes: ["/opt/appdata/jellyseerr:/app/config"]
+    ports: ["5055:5055"]
+    restart: unless-stopped
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    environment:
+      - SECRET_ENCRYPTION_KEY=<local>
+      - TZ=America/Phoenix
+    volumes:
+      - /opt/appdata/homarr:/appdata
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports: ["7575:7575"]
+    restart: unless-stopped
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    environment:
+      - ND_SCANSCHEDULE=1h
+      - ND_LOGLEVEL=info
+      - ND_BASEURL=
+      - ND_SEARCHFULLSTRING=true
+      - TZ=America/Phoenix
+    volumes:
+      - /opt/appdata/navidrome:/data
+      - /data/media/music:/music
+    ports: ["4533:4533"]
+    restart: unless-stopped
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment: [PUID=1000, PGID=1000, TZ=America/Phoenix]
+    volumes:
+      - /opt/appdata/bazarr:/config
+      - /data:/data
+    ports: ["6767:6767"]
+    dns: [172.18.0.1]
+    restart: unless-stopped
+  dnscache:
+    image: coredns/coredns:1.11.3
+    container_name: dnscache
+    network_mode: host
+    command: ["-conf", "/Corefile"]
+    volumes: ["/opt/appdata/dnscache/Corefile:/Corefile:ro"]
+    restart: unless-stopped
+  netmon:
+    image: alpine:3.20
+    container_name: netmon
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW]
+    environment: [TZ=America/Phoenix]
+    command: ["sh", "-c", "apk add --no-cache python3 wireguard-tools-wg tzdata >/dev/null && exec nice -n 15 python3 -u /netmon.py"]
+    volumes:
+      - /opt/arr/netmon.py:/netmon.py:ro
+      - /data/logs/netmon:/logs
+    restart: unless-stopped
+  claude-box:
+    build: ./claude-box
+    container_name: claude-box
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/arr:/opt/arr
+      - /opt/appdata:/opt/appdata
+      - /data:/data
+      - /etc/wireguard:/etc/wireguard
+      - /root/.claude:/root/.claude
