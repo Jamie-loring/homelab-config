@@ -3,7 +3,7 @@
 # (gluetun needs an IP, not a hostname) and restarts the tunnel if the IP
 # rotated or gluetun is unhealthy. Logged to the journal (tag vpn-watchdog).
 set -u
-HOST="usa-phoenix-ca-version-2.expressnetw.com"
+HOST="${VPN_ENDPOINT:-<your-vpn-endpoint-hostname>}"
 OVPN="/opt/arr/gluetun/custom.ovpn"
 PORT="1195"
 cur=$(awk "/^remote /{print \$2; exit}" "$OVPN")

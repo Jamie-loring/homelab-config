@@ -1,6 +1,6 @@
 # Media Server — Setup & Runbook
 
-N100 mini PC, Debian 13. Static IP `192.168.132.4`. Full arr stack running as Docker containers.
+N100 mini PC, Debian 13. Static IP `<mediaserver-ip>`. Full arr stack running as Docker containers.
 
 ---
 
@@ -19,7 +19,7 @@ N100 mini PC, Debian 13. Static IP `192.168.132.4`. Full arr stack running as Do
 | Homarr | 7575 | dash.lan |
 | Bazarr | 6767 | — |
 
-DNS rewrites: AdGuard Home @ `192.168.132.168`. See `../lan-dns.md`.
+DNS rewrites: AdGuard Home @ `<adguard-ip>`. See `../lan-dns.md`.
 
 ---
 
@@ -131,5 +131,5 @@ ARTIST_BLOCKLIST = {
 
 ## IoT VLAN Note
 
-IoT VLAN (192.168.133.0/24) has DROP rule for IoT→LAN.
+IoT VLAN (<iot-subnet>) has DROP rule for IoT→LAN.
 SSH to the media server will fail from the IoT SSID. Use main LAN SSID or WireGuard.

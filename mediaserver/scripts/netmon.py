@@ -12,8 +12,8 @@ POLL     = 30
 KEEP_DAYS= 30
 PEERS    = {"<phone-peer-public-key>": ("phone", "10.13.13.2"),
             "<vm-peer-public-key>":    ("vm",    "10.13.13.4")}
-GATEWAY  = "192.168.132.1"
-ADGUARD  = "192.168.132.168"
+GATEWAY  = os.environ.get("LAN_GATEWAY",  "<lan-gateway-ip>")
+ADGUARD  = os.environ.get("ADGUARD_IP",  "<adguard-ip>")
 DDNS     = "<your-ddns-hostname>"
 STALE    = 180   # handshake older than this = tunnel idle/down (phone keepalive is 25s)
 

@@ -1,8 +1,8 @@
 # LAN DNS Shortcuts (.lan)
 
-All entries are AdGuard Home DNS rewrites on **192.168.132.168**, pointing to the media server at **192.168.132.4** unless noted.
+All entries are AdGuard Home DNS rewrites on **<adguard-ip>**, pointing to the media server at **<mediaserver-ip>** unless noted.
 
-## Media Server (192.168.132.4) — arr stack
+## Media Server (<mediaserver-ip>) — arr stack
 
 | Address | Port | Service |
 |---|---|---|
@@ -17,20 +17,20 @@ All entries are AdGuard Home DNS rewrites on **192.168.132.168**, pointing to th
 
 | Address | Host | Notes |
 |---|---|---|
-| mediabox.lan | 192.168.132.4 | SSH port 2222 → claude-box container; drops into tmux `main` |
-| *(no shortcut)* | 192.168.132.168 | AdGuard Home web UI — use IP directly |
+| mediabox.lan | <mediaserver-ip> | SSH port 2222 → claude-box container; drops into tmux `main` |
+| *(no shortcut)* | <adguard-ip> | AdGuard Home web UI — use IP directly |
 
 ## Adding a new entry
 
 ```bash
-ssh root@192.168.132.168
+ssh root@<adguard-ip>
 ```
 
 Edit `/opt/AdGuardHome/AdGuardHome.yaml`, append under `dns.rewrites`:
 
 ```yaml
     - domain: newname.lan
-      answer: 192.168.132.4
+      answer: <mediaserver-ip>
       enabled: true
 ```
 

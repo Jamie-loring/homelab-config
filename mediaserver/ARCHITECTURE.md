@@ -6,8 +6,8 @@
 |---|---|
 | **Hardware** | N100 mini PC |
 | **OS** | Debian GNU/Linux 13 (trixie) |
-| **IP** | 192.168.132.4 (static, DHCP reservation) |
-| **Storage** | NAS mount: `192.168.132.3:/mnt/HD/HD_a2/mediaserver` → `/data` (NFS over LAN, ~7.3TB) |
+| **IP** | <mediaserver-ip> (static, DHCP reservation) |
+| **Storage** | NAS mount: `<nas-ip>:/mnt/HD/HD_a2/mediaserver` → `/data` (NFS over LAN, ~7.3TB) |
 | **WireGuard** | Server on host, `/etc/wireguard/wg0.conf`, tunnel `10.13.13.0/24` |
 
 ---
@@ -18,7 +18,7 @@ All services run via Docker Compose at `/opt/arr/docker-compose.yml`.
 Docker network: `arr_default` (bridge). Exceptions noted below.
 
 ```
-Host (192.168.132.4)
+Host (<mediaserver-ip>)
 │
 ├── gluetun          [bridge, host ports 8080/6881]   — OpenVPN killswitch container
 │   └── qbittorrent  [network_mode: service:gluetun]  — shares gluetun's network stack
@@ -40,11 +40,11 @@ Host (192.168.132.4)
 
 ### DNS Architecture
 
-Arr containers (sonarr/radarr/lidarr/prowlarr/bazarr) use `dns: 172.18.0.1` (CoreDNS cache container on host network). CoreDNS forwards to AdGuard @ `192.168.132.168`. This prevents DNS-over-container-bridge latency and gives local `.lan` resolution inside containers.
+Arr containers (sonarr/radarr/lidarr/prowlarr/bazarr) use `dns: 172.18.0.1` (CoreDNS cache container on host network). CoreDNS forwards to AdGuard @ `<adguard-ip>`. This prevents DNS-over-container-bridge latency and gives local `.lan` resolution inside containers.
 
 ### VPN / qBittorrent Isolation
 
-gluetun is a killswitch VPN container. qBittorrent runs in `network_mode: service:gluetun` — it shares gluetun's network namespace entirely. If the VPN drops, qBittorrent loses internet access automatically. `FIREWALL_OUTBOUND_SUBNETS=192.168.132.0/24` allows qBittorrent to still reach the LAN (for arr communication) while all internet traffic goes through the VPN.
+gluetun is a killswitch VPN container. qBittorrent runs in `network_mode: service:gluetun` — it shares gluetun's network namespace entirely. If the VPN drops, qBittorrent loses internet access automatically. `FIREWALL_OUTBOUND_SUBNETS=<lan-subnet>` allows qBittorrent to still reach the LAN (for arr communication) while all internet traffic goes through the VPN.
 
 VPN provider: ExpressVPN, custom OpenVPN config at `/opt/arr/gluetun/custom.ovpn`.
 `vpn-watchdog.sh` (cron every 5 min) re-resolves the endpoint hostname and restarts gluetun if the IP rotated or health check fails.
@@ -102,7 +102,7 @@ Phone access (Terminus): RSA 4096 PEM key, forced tmux attach via `authorized_ke
 Server on media server host (not the router).
 - Interface: `wg0`, `10.13.13.1/24`, port `51820`
 - DDNS: `<your-ddns-hostname>` (Cloudflare, updated by router every 5 min)
-- DNS split horizon: AdGuard resolves `<your-ddns-hostname>` → `192.168.132.4` for LAN clients (hairpin fix)
+- DNS split horizon: AdGuard resolves `<your-ddns-hostname>` → `<mediaserver-ip>` for LAN clients (hairpin fix)
 - Peers: phone `10.13.13.2`, VM `10.13.13.3`
 - Private keys: NOT backed up. Stored in Jamie's memory only.
 - See `../wireguard/connection.md` for full topology.
@@ -113,12 +113,12 @@ Server on media server host (not the router).
 
 | | |
 |---|---|
-| **LAN** | 192.168.132.0/24 |
-| **IoT VLAN** | 192.168.133.0/24 — DROP IoT→LAN except Jellyfin :8096 and Navidrome :4533 |
+| **LAN** | <lan-subnet> |
+| **IoT VLAN** | <iot-subnet> — DROP IoT→LAN except Jellyfin :8096 and Navidrome :4533 |
 | **WireGuard tunnel** | 10.13.13.0/24 |
-| **Router** | DD-WRT R6700 @ 192.168.132.1 |
-| **DNS** | AdGuard Home @ 192.168.132.168 (forced via DNAT) |
-| **NAS** | WD My Cloud EX2 Ultra @ 192.168.132.3 |
+| **Router** | DD-WRT R6700 @ <router-ip> |
+| **DNS** | AdGuard Home @ <adguard-ip> (forced via DNAT) |
+| **NAS** | WD My Cloud EX2 Ultra @ <nas-ip> |
 
 **IoT VLAN caveat:** SSH to media server fails from the IoT SSID. Use main LAN SSID or WireGuard.
 
