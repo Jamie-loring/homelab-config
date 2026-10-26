@@ -101,8 +101,8 @@ Phone access (Terminus): RSA 4096 PEM key, forced tmux attach via `authorized_ke
 
 Server on media server host (not the router).
 - Interface: `wg0`, `10.13.13.1/24`, port `51820`
-- DDNS: `vpn.jamieloring.com` (Cloudflare, updated by router every 5 min)
-- DNS split horizon: AdGuard resolves `vpn.jamieloring.com` → `192.168.132.4` for LAN clients (hairpin fix)
+- DDNS: `<your-ddns-hostname>` (Cloudflare, updated by router every 5 min)
+- DNS split horizon: AdGuard resolves `<your-ddns-hostname>` → `192.168.132.4` for LAN clients (hairpin fix)
 - Peers: phone `10.13.13.2`, VM `10.13.13.3`
 - Private keys: NOT backed up. Stored in Jamie's memory only.
 - See `../wireguard/connection.md` for full topology.
@@ -120,7 +120,7 @@ Server on media server host (not the router).
 | **DNS** | AdGuard Home @ 192.168.132.168 (forced via DNAT) |
 | **NAS** | WD My Cloud EX2 Ultra @ 192.168.132.3 |
 
-**IoT VLAN caveat:** SSH to media server fails from Loring-IOT SSID. Use main Loring SSID or WireGuard.
+**IoT VLAN caveat:** SSH to media server fails from the IoT SSID. Use main LAN SSID or WireGuard.
 
 ---
 

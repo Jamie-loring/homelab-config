@@ -94,7 +94,7 @@ Key:  RSA 4096 PEM (terminus_rsa) — stored locally / in Terminus app
 ```
 
 The `claude-box/` Dockerfile is in `/opt/arr/claude-box/` on the server.
-Phone access: connect over WireGuard, use IP `192.168.132.4:2222`.
+Phone access: connect over WireGuard, SSH to the server IP on port 2222.
 
 ---
 
@@ -131,5 +131,5 @@ ARTIST_BLOCKLIST = {
 
 ## IoT VLAN Note
 
-Loring-IOT SSID (192.168.133.0/24) has DROP rule for IoT→LAN.
-SSH to the media server will fail from IoT VLAN. Use main Loring SSID or WireGuard.
+IoT VLAN (192.168.133.0/24) has DROP rule for IoT→LAN.
+SSH to the media server will fail from the IoT SSID. Use main LAN SSID or WireGuard.

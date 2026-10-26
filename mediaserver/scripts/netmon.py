@@ -10,11 +10,11 @@ import csv, os, re, socket, struct, subprocess, time, random, urllib.request, gl
 LOGDIR   = "/logs"
 POLL     = 30
 KEEP_DAYS= 30
-PEERS    = {"6qTlwaZmd3ttIIU+0xqLMWh5V0kpsETTFaTtJyBb73c=": ("phone", "10.13.13.2"),
-            "j6ynbHEhvCsmq2oIJK7PJ+dve0xO3TNfFVnyWPAXswA=": ("vm",    "10.13.13.4")}
+PEERS    = {"<phone-peer-public-key>": ("phone", "10.13.13.2"),
+            "<vm-peer-public-key>":    ("vm",    "10.13.13.4")}
 GATEWAY  = "192.168.132.1"
 ADGUARD  = "192.168.132.168"
-DDNS     = "vpn.jamieloring.com"
+DDNS     = "<your-ddns-hostname>"
 STALE    = 180   # handshake older than this = tunnel idle/down (phone keepalive is 25s)
 
 FIELDS = ["time","phone_endpoint","phone_hs_age","phone_rx_b","phone_tx_b","phone_ping_loss","phone_rtt_ms",

@@ -23,7 +23,7 @@ All entries are AdGuard Home DNS rewrites on **192.168.132.168**, pointing to th
 ## Adding a new entry
 
 ```bash
-ssh -i ~/.ssh/pihole_root root@192.168.132.168
+ssh root@192.168.132.168
 ```
 
 Edit `/opt/AdGuardHome/AdGuardHome.yaml`, append under `dns.rewrites`:
