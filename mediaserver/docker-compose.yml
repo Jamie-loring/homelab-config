@@ -149,6 +149,7 @@ services:
     build: ./claude-box
     container_name: claude-box
     restart: unless-stopped
+    command: /usr/local/bin/start-claude-box.sh
     privileged: true
     network_mode: host
     volumes:
@@ -158,3 +159,24 @@ services:
       - /data:/data
       - /etc/wireguard:/etc/wireguard
       - /root/.claude:/root/.claude
+
+  slskd:
+    image: slskd/slskd:latest
+    container_name: slskd
+    environment:
+      - SLSKD_SLSK_USERNAME=<local>
+      - SLSKD_SLSK_PASSWORD=<local>
+      - SLSKD_HTTP_PORT=5031
+      - SLSKD_NO_HTTPS=true
+      - SLSKD_NO_AUTH=false
+      - SLSKD_USERNAME=<local>
+      - SLSKD_PASSWORD=<local>
+      - SLSKD_API_KEY=<local>
+      - SLSKD_DOWNLOADS_DIR=/data/torrents/slskd
+      - SLSKD_SHARED_DIR=/data/media/music
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - TZ=America/Phoenix
+    volumes:
+      - /opt/appdata/slskd:/app
+      - /data/torrents/slskd:/data/torrents/slskd
+      - /data/media/music:/data/media/music:ro
